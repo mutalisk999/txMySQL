@@ -510,11 +510,23 @@ class ConnectionPool:
 
     def runQuery(self, query, query_args=None):
         conn = self._getConnection()
-        return conn.runQuery(query, query_args)
+        #return conn.runQuery(query, query_args)
+        def err_back(ex):
+            self._unused_connections.append(conn)
+            raise ex
+        d = conn.runQuery(query, query_args)
+        d.addErrback(err_back)
+        return d
 
     def runOperation(self, query, query_args=None):
         conn = self._getConnection()
-        return conn.runOperation(query, query_args)
+        #return conn.runOperation(query, query_args)
+        def err_back(ex):
+            self._unused_connections.append(conn)
+            raise ex
+        d = conn.runOperation(query, query_args)
+        d.addErrback(err_back)
+        return d
 
     def selectDb(self, db):
         conn = self._getConnection()
